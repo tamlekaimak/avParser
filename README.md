@@ -2,4 +2,4 @@
 
 Бот для парсинга сайта Avito
 
-![mainmenu](https://github.com/tamlekaimak/avParser/blob/main/images/logo.jpeg)
+![mainmenu](https://github.com/tamlekaimak/avParser/blob/main/images/logo.jpg)
