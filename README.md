@@ -4,6 +4,12 @@
 
 ![mainmenu](https://github.com/tamlekaimak/avParser/blob/main/images/menu.png)
 
+Ссылка на бота:
+https://t.me/avparserBot
+
+Username Бота:
+@avparserBot
+
 Запуск бота:
 1. Переходишь в папку с main.py
 ```
