@@ -8,10 +8,6 @@
 
 https://t.me/avparserBot
 
-Username бота:
-```
-@avparserBot
-```
 ### Запуск бота
 1. Переходишь в папку с main.py
 ```
