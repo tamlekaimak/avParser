@@ -8,7 +8,7 @@
 
 https://t.me/avparserBot
 
-Username Бота:
+Username бота:
 ```
 @avparserBot
 ```
