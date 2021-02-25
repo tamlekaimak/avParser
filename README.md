@@ -29,5 +29,6 @@ pip install -r requirements.txt
 ```
 python main.py
 ```
-Если всё сделано правильно должно выйти
+Если всё сделано правильно должно выйти так
+
 ![BOT STARTED!](https://github.com/tamlekaimak/avParser/blob/main/images/bot_started.png)
