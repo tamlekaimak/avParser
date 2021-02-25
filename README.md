@@ -1,9 +1,9 @@
 # avParser
 
 Бот для парсинга сайта Avito
-Ссылка на бота:
 
-https://t.me/avparserBot
+[Ссылка на бота](https://t.me/avparserBot)
+
 ![mainmenu](https://github.com/tamlekaimak/avParser/blob/main/images/menu.png)
 
 
