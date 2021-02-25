@@ -6,9 +6,6 @@
 
 ![mainmenu](https://github.com/tamlekaimak/avParser/blob/main/images/menu.png)
 
-
-https://t.me/avparserBot
-
 ### Запуск бота
 1. Переходишь в папку с main.py
 ```
