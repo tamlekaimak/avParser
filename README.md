@@ -1,6 +1,6 @@
 # avParser
 
-[Ссылка на бота](https://t.me/avParser)
+[Ссылка на бота](https://t.me/avParserBot)
 
 Бот для парсинга сайта Avito
 
