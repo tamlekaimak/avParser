@@ -1,6 +1,6 @@
 # avParser
 
-[Ссылка на бота](http://memesmix.net/media/created/amydvj.jpg)
+[Ссылка на бота](https://t.me/avParser)
 
 Бот для парсинга сайта Avito
 
