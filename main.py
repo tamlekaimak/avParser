@@ -1,5 +1,5 @@
 import telebot
-import parserPRO
+import darkparser
 from telebot import types
 import json
 from db import connectDB, insert, newClient
@@ -136,11 +136,11 @@ def texthandle(message):
         new_message = 'Парсер запущен, осталось только подождать!'
         send(chatid, new_message)
         value = message.text
-        print('DATA: ', city[chatid], value, str(chatid))
-        parserPRO.main(city[chatid], value, chatid)
+        print('DATA: ', city[chatid], value, chatid)
+        darkparser.main(city[chatid], value, str(chatid))
         new_message = 'Готово, держи свой csv, терпила!'
         send(chatid, new_message)
-        senddoc(chatid, value, new_message)
+        senddoc(chatid, value)
     else:
         new_message = 'Я тебя не понял!'
         send(chatid, new_message)
