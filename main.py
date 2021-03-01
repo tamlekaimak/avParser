@@ -5,17 +5,29 @@ import json
 from db import connectDB, insert, newClient
 from cities import cities
 import time
-
-
+import dbcreate
+import sqlite3 as db
 # открываем json файл и считываем оттуда токен бота
 with open('token.json', 'r', encoding='utf-8') as f:
     text = json.load(f)
 
 botToken = text['token']
 
-bot = telebot.AsyncTeleBot(botToken)
+bot = telebot.TeleBot(botToken)
 
 print("BOT STARTED!")
+
+
+try:
+    connection = db.connect("darkDB.db")
+    print("Connected to DB.\n" + '-'*20 + "\nTables:")
+    cursor = connection.cursor()
+    cursor.execute('SELECT name from sqlite_master where type= "table"')
+    print(cursor.fetchall())
+    if not cursor.fetchall():
+        dbcreate.createTables()
+except Exception as e:
+    print(e)
 
 def isCityTrue(name):
     if name in cities.keys():

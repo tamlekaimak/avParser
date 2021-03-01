@@ -1,12 +1,7 @@
-import pyodbc as db
+import sqlite3 as db
 
 def connectDB():
-    connection = db.connect(
-        'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=DESKTOP-18IG06U;'
-        'DATABASE=avParser;'
-        'Trusted_connection=yes;'
-    )
+    connection = db.connect('darkDB.db')
     return connection
 
 def insert(chatid, username):
