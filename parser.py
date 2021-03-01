@@ -64,7 +64,7 @@ def get_page_data(html,name_file,user_id):
                     'url': url, },
                         ignore_index=True)
 
-    Data.to_csv(''+name_file+"_"+user_id+".csv",encoding="cp1251",)
+    Data.to_csv(''+name_file+"__"+user_id+".csv",encoding="cp1251",)
     return name_file
     
 def main(g_city,search,user_id):
