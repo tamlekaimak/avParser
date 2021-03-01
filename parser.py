@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 import csv
 import re
-from unidecode import unidecode
 import time
 from requests.exceptions import ProxyError, ReadTimeout, SSLError, ConnectionError
 import cfscrape
@@ -155,12 +154,13 @@ def paste_total(url, name_file, user_id):  # запись таблицы
             'name_razdel': name_razdel
             }
     try:
-        write_shapka_csv(data, name_file, user_id)
+        write_csv(data, name_file, user_id)
     except:
         print("(((")
 
 
 def main(g_city, search, user_id):
+    print("Yo")
     main_url = "https://www.avito.ru/"
     path = main_url + g_city + "?q=" + search.replace(' ', '+')
     total_pages = get_total_pages(get_html(path))  # обращается к функции которая считает количество страниц
@@ -185,3 +185,7 @@ def main(g_city, search, user_id):
     page = get_page_data(html, search, user_id)
     paste_total(path, search, user_id)
     print('Excel файл \'' + page + '.csv\' успешно создан! ')
+
+if( __name__ == "__main__"):
+    print("hello")
+    main("kazan","Велосипеды","1")
