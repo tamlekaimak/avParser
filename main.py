@@ -1,5 +1,5 @@
 import telebot
-import parserPRO
+import parser
 from telebot import types
 import json
 from db import connectDB, insert, newClient
@@ -137,7 +137,7 @@ def texthandle(message):
         send(chatid, new_message)
         value = message.text
         print('DATA: ', city[chatid], value, str(chatid))
-        parserPRO.main(city[chatid], value, chatid)
+        parser.main(city[chatid], value, chatid)
         new_message = 'Готово, держи свой csv, терпила!'
         send(chatid, new_message)
         senddoc(chatid, value, new_message)
