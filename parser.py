@@ -64,7 +64,7 @@ def get_page_data(html,name_file,user_id):
                     'url': url, },
                         ignore_index=True)
 
-    Data.to_csv(''+name_file+"__"+user_id+".csv",encoding="cp1251",)
+    Data.to_csv('Объявления/'+name_file+"__"+user_id+".csv",encoding="cp1251",)
     return name_file
     
 def main(g_city,search,user_id):
@@ -78,6 +78,6 @@ def main(g_city,search,user_id):
 
 
 if(__name__=="__main__"):
-    main("kazan","Кирпичи",'1')
+    main("kazan","Ильдан",'1')
 
 # >>>>>>> 9a6929b207372c3b501b52fe0dca4f5761164901
