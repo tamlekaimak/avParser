@@ -1,15 +1,10 @@
-<<<<<<< HEAD
-print("Yaho");
-=======
+
 # тут будет код для парсера
 # -*- coding: utf-8 -*-
 import requests
 from bs4 import BeautifulSoup
-import csv
+import pandas as pd
 import re
-from unidecode import unidecode
-import time
-from requests.exceptions import ProxyError, ReadTimeout, SSLError, ConnectionError
 import cfscrape
 
 
@@ -30,9 +25,9 @@ def get_session():
 
 def get_html(url):#возвращает html код
     session = get_session()
-    r = session.get(url)
-    print(r.status_code)
-    return r.text
+    htmlbody = session.get(url)
+    print(htmlbody.status_code)
+    return htmlbody.text
 
 
 def delete_symbol(str):
@@ -40,13 +35,12 @@ def delete_symbol(str):
 
 
 
-def get_page_data(html,name_file,user_id): 
-    session = get_session()
+def get_page_data(html,name_file,user_id):
     soup = BeautifulSoup(html, 'lxml')
     ads = soup.find_all('div', class_='iva-item-body-NPl6W')
+    date=''
+    Data=pd.DataFrame(columns=['title','price','date','url'])
     for ad in ads:
-        #title,price,place,nomer,opisanie
-        print(q)
         try:
             title = ad.find('a').text.strip()
         except:
@@ -58,63 +52,32 @@ def get_page_data(html,name_file,user_id):
             price = ''    
         try:
             url = 'https://www.avito.ru/' + ad.find('a').get('href').strip()
-            
         except:
             url = '' 
         try:
-            data = ad.find('div',class_="date-text-2jSvU text-text-1PdBw text-size-s-1PUdo text-color-noaccent-bzEdI").text.strip()
+            date = ad.find('div', class_="date-text-2jSvU text-text-1PdBw text-size-s-1PUdo text-color-noaccent-bzEdI").text.strip()
         except:
-            data = ''
-        data = {'title':title,
-                'price':price,
-                'data':data,
-                'url':url}
-        write_csv(data, name_file,user_id)
-        q=q+1
+            date=''
+        Data=Data.append({'title': title,
+                    'price': price,
+                    'date': date,
+                    'url': url, },
+                        ignore_index=True)
+
+    Data.to_csv(''+name_file+"_"+user_id+".csv",encoding="cp1251",)
     return name_file
-
-
-
-def write_csv(data, name_file,user_id ):#запись в файл
-    with open(str(name_file) +user_id+'_'+'.csv','a', encoding="cp1251", newline='',errors='replace') as f:
-        writer = csv.writer(f, delimiter=';')
-        writer.writerow((data['title'],
-                         data['price'],
-                         data['data'],
-                         data['url']))
-
-
-
-def paste_total(url, name_file,user_id):#запись таблицы
-    soup = BeautifulSoup(url, 'lxml') 
-    try:
-        total = soup.find('span', class_='page-title-count-1oJOc').text
-    except:
-        total = 0
-    try:        
-        name_razdel = soup.find('h1', class_='page-title-inline-2v2CW').text.strip()
-    except:
-        name_razdel = ''    
-    data = {'total': total,
-            'name_razdel':name_razdel
-           }
-    try:
-        write_shapka_csv(data,name_file,user_id)
-    except: print("(((")
     
 def main(g_city,search,user_id):
-    main_url="https://www.avito.ru/"
-    path=main_url+g_city+"?q="+search.replace(' ','+')
-    mainurl_no_pages=main_url+g_city+"?"
-    dopurl="&"+"q="+search.replace(' ', '+')
-    dopurl_no_pages="q="+search.replace(' ', '+')
+    main_url = "https://www.avito.ru/"
+    mainurl_no_pages = main_url+g_city+"?"
+    dopurl_no_pages = "q="+search.replace(' ', '+')
     url_gen = mainurl_no_pages+dopurl_no_pages
     html = get_html(url_gen)
     page = get_page_data(html,search,user_id)
-    paste_total(path, search,user_id)
     print('Excel файл \'' + page + '.csv\' успешно создан! ')
 
 
+if(__name__=="__main__"):
+    main("kazan","Кирпичи",'1')
 
-
->>>>>>> 9a6929b207372c3b501b52fe0dca4f5761164901
+# >>>>>>> 9a6929b207372c3b501b52fe0dca4f5761164901
