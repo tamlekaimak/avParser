@@ -23,3 +23,15 @@ def newClient(chatid):
         if chatid == i[0]:
             return False
     return True
+
+
+if __name__ == '__main__':
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = ("SELECT * FROM Clients")
+    cursor.execute(query)
+    res = cursor.fetchall()
+    for i in res:
+        print(i)
+    connection.close()
+
