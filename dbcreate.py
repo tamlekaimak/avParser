@@ -15,10 +15,12 @@ def createTables():
     connection.commit()
     query = ("""    
     CREATE TABLE Orders(
-        orderid int PRIMARY KEY,
+        orderid INTEGER PRIMARY KEY AUTOINCREMENT,
         chatid int NOT NULL,
         city NVARCHAR(100) NOT NULL,
+        cityRus NVARCHAR(100) NOT NULL,
         orderData NVARCHAR(100) NOT NULL,
+        isFinished int NOT NULL DEFAULT (0),
         FOREIGN KEY(chatid) REFERENCES Clients(chatid)
     );
     """)

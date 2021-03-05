@@ -2,7 +2,7 @@ import telebot
 import parserpro
 from telebot import types
 import json
-from db import connectDB, insert, newClient
+from db import connectDB, insert, newClient, BuysCount, NewOrder, Orders
 from cities import cities
 import time
 import dbcreate
@@ -13,7 +13,7 @@ with open('token.json', 'r', encoding='utf-8') as f:
 
 botToken = text['token']
 
-bot = telebot.TeleBot(botToken)
+bot = telebot.TeleBot("1484844322:AAGj3l-O8wAIlp-O_0VTIa-zhaFji78lyMY")
 
 print("BOT STARTED!")
 
@@ -34,33 +34,30 @@ def isCityTrue(name):
         return cities[name]
     return False
 
-def sendmenu(chatid, message, menu, markdown=True):
+def send(chatid, message, menu=False, markdown=True):
     try:
-        if markdown:
-            bot.send_message(chatid, message, reply_markup=menu, parse_mode='Markdown')
+        if not menu:
+            bot.send_message(chatid, message, parse_mode='Markdown')
         else:
-            bot.send_message(chatid, message, reply_markup=menu)
+            if markdown:
+                bot.send_message(chatid, message, reply_markup=menu, parse_mode='Markdown')
+            else:
+                bot.send_message(chatid, message, reply_markup=menu)
     except Exception as e:
         print(e)
         return False
     else:
         return True
 
-def send(chatid, message):
+def edit(chatid, messageid, new_message, menu=False, markdown=True):
     try:
-        bot.send_message(chatid, message, parse_mode='Markdown')
-    except Exception as e:
-        print(e)
-        return False
-    else:
-        return True
-
-def editmenu(chatid, messageid, new_message, menu, markdown=True):
-    try:
-        if markdown:
-            bot.edit_message_text(chat_id=chatid, message_id=messageid, text=new_message, reply_markup=menu, parse_mode='Markdown')
+        if not menu:
+            bot.edit_message_text(chat_id=chatid, message_id=messageid, text=new_message, parse_mode='Markdown')
         else:
-            bot.edit_message_text(chat_id=chatid, message_id=messageid, text=new_message, reply_markup=menu)
+            if markdown:
+                bot.edit_message_text(chat_id=chatid, message_id=messageid, text=new_message, reply_markup=menu, parse_mode='Markdown')
+            else:
+                bot.edit_message_text(chat_id=chatid, message_id=messageid, text=new_message, reply_markup=menu)
     except Exception as e:
         print(e)
         return False
@@ -77,27 +74,18 @@ def senddoc(chatid, value):
         return True
 
 
-def edit(chatid, messageid, new_message):
-    try:
-        bot.edit_message_text(chat_id=chatid, message_id=messageid, text=new_message, parse_mode='Markdown')
-    except Exception as e:
-        print(e)
-        return False
-    else:
-        return True
-
 def mainmenu(chatid):
     menu = types.InlineKeyboardMarkup()
     menu.add(types.InlineKeyboardButton(text='🔎Спарсить', callback_data='parse'))
-    #menu.add(types.InlineKeyboardButton(text='👨🏽‍💻Профиль', callback_data='profile'), types.InlineKeyboardButton(text='🗒История', callback_data='history'))
+    menu.add(types.InlineKeyboardButton(text='👨🏽‍💻Профиль', callback_data='profile'), types.InlineKeyboardButton(text='🗒История', callback_data='history'))
     #menu.add(types.InlineKeyboardButton(text='❓Инструкция', callback_data='instruction'), types.InlineKeyboardButton(text='👨🏼‍🔧Помощь', callback_data='help'))
     new_message = "_Главное меню_"
-    sendmenu(chatid, new_message, menu)
+    send(chatid, new_message, menu)
 
 def retmainmenu(chatid, message_id):
     menu = types.InlineKeyboardMarkup()
     menu.add(types.InlineKeyboardButton(text='🔎Спарсить', callback_data='parse'))
-    #menu.add(types.InlineKeyboardButton(text='👨🏽‍💻Профиль', callback_data='profile'), types.InlineKeyboardButton(text='🗒История', callback_data='history'))
+    menu.add(types.InlineKeyboardButton(text='👨🏽‍💻Профиль', callback_data='profile'), types.InlineKeyboardButton(text='🗒История', callback_data='history'))
     #menu.add(types.InlineKeyboardButton(text='❓Инструкция', callback_data='instruction'), types.InlineKeyboardButton(text='👨🏼‍🔧Помощь', callback_data='help'))
     new_message = "_Главное меню_"
     try:
@@ -112,14 +100,16 @@ def welcome(chatid):
     menu.add(types.InlineKeyboardButton(text="Пользовательское соглашение", url="https://telegra.ph/")) #<ссылка на польз. соглашение>
     menu.add(types.InlineKeyboardButton(text='Продолжить', callback_data='continue'))
     new_message = "Добро пожаловать в avParser!\n\nПрочитайте инструкцию перед входом.\n\nДля продолжения необходимо принять *Пользовательское соглашение*"
-    sendmenu(chatid, new_message, menu)
+    send(chatid, new_message, menu)
 
 # массив для проверки отправления города пользователем
 citysend = []
 # массив для проверки отправления города пользователем
 valuesend = []
-# словарь в который записывается город перед отправкой в БД
+# словарь в который записывается город перед отправкой в БД (на английском)
 city = {}
+# словарь в который записывается город перед отправкой в БД (на русском)
+cityRus = {}
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -135,11 +125,14 @@ def texthandle(message):
     if chatid in citysend:
         check = isCityTrue(message.text)
         if check:
+            menu = types.InlineKeyboardMarkup()
             citysend.remove(chatid)
             city[chatid] = check
+            cityRus[chatid] = message.text
             new_message = 'Отлично, теперь запрос:'
-            send(chatid, new_message)
             valuesend.append(chatid)
+            menu.add(types.InlineKeyboardButton(text="отмена", callback_data="cancelsend"))
+            send(chatid, new_message, menu)
         else:
             new_message = 'Город не найден! Попробуй еще раз:'
             send(chatid, new_message)
@@ -149,10 +142,12 @@ def texthandle(message):
         send(chatid, new_message)
         value = message.text
         print('DATA: ', city[chatid], value, str(chatid))
+        NewOrder(chatid, city[chatid], cityRus[chatid], value)
         parserpro.main(city[chatid], value, str(chatid))
-        new_message = 'Готово, держи свой csv, терпила!'
+        new_message = 'Готово, держи свой csv!'
         send(chatid, new_message)
         senddoc(chatid, value)
+        mainmenu(chatid)
     else:
         new_message = 'Я тебя не понял!'
         send(chatid, new_message)
@@ -170,9 +165,51 @@ def answer(message):
             print(message.data + ' Error: ', e)
     elif message.data == 'parse':
         try:
-           new_message = 'Оптправь мне название города:'
+           menu = types.InlineKeyboardMarkup()
+           new_message = 'Отправь мне название города:'
            citysend.append(chatid)
-           edit(chatid, message.message.message_id, new_message)
+           menu.add(types.InlineKeyboardButton(text="отмена", callback_data="cancelsend"))
+           edit(chatid, message.message.message_id, new_message, menu)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
+    elif message.data == 'profile':
+        try:
+            menu = types.InlineKeyboardMarkup()
+            new_message = "Ваш id: " + str(chatid) + "\nКол-во заказов: " + str(BuysCount(chatid))
+            menu.add(types.InlineKeyboardButton(text="назад", callback_data="retmainmenu"))
+            edit(chatid, message.message.message_id, new_message, menu)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
+    elif message.data == 'history':
+        try:
+            menu = types.InlineKeyboardMarkup()
+            if BuysCount(chatid) == 0:
+                new_message = 'У вас нет заказов!'
+            else:
+                new_message = 'Ваши заказы:\n'
+                for orderid, cityRus, orderData, isFinished in Orders(chatid):
+                    new_message += "*#" + str(orderid) + "*\n" + str(cityRus) + ": " + str(orderData) + "\nСтатус: "
+                    if isFinished == 0:
+                        new_message += "В очереди❌\n\n"
+                    else:
+                        new_message += "Отправлен✅\n\n"
+            menu.add(types.InlineKeyboardButton(text="назад", callback_data="retmainmenu"))
+            edit(chatid, message.message.message_id, new_message, menu)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
+    elif message.data == 'cancelsend':
+        try:
+            if chatid in citysend:
+                citysend.remove(chatid)
+            if chatid in valuesend:
+                valuesend.remove(chatid)
+            
+            retmainmenu(chatid, message.message.message_id)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
+    elif message.data == 'retmainmenu':
+        try:
+            retmainmenu(chatid, message.message.message_id)
         except Exception as e:
             print(message.data + ' Error: ', e)
            
