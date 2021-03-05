@@ -13,7 +13,7 @@ with open('token.json', 'r', encoding='utf-8') as f:
 
 botToken = text['token']
 
-bot = telebot.TeleBot("1484844322:AAGj3l-O8wAIlp-O_0VTIa-zhaFji78lyMY")
+bot = telebot.TeleBot(botToken)
 
 print("BOT STARTED!")
 
