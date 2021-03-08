@@ -19,3 +19,5 @@ six==1.15.0
 soupsieve==2.2
 Unidecode==1.2.0
 urllib3==1.26.3
+pyQiwiP2P~=1.0a9
+openpyxl~=3.0.7
