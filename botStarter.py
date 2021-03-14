@@ -1,3 +1,7 @@
+"""
+Здесь стартуется бот
+"""
+
 import telebot
 import json
 

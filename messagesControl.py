@@ -1,3 +1,7 @@
+"""
+Тут функции по отправке редактированию сообщений
+"""
+
 from botStarter import bot
 from telebot import types
 

@@ -1,5 +1,4 @@
 from telebot import types
-import parserpro
 from db import insert, IsNewClient, BuysCount, NewOrder, Orders, dbstart, NewParseOrder, getOrderStatus
 from cities import cities
 from messagesControl import mainmenu, welcome, edit, send

@@ -1,3 +1,7 @@
+"""
+Тут функция по парсингу
+"""
+
 from db import ParseOrder, getChatid, isMoreOrders, UpdateOrderStatus
 import parserpro
 from messagesControl import send, senddoc
@@ -8,6 +12,10 @@ isParsingNow = False
 
 
 def GoParse():
+    """
+    Функция котролирует чтобы оба потока не заходили в парсер, пока один поток парсит, второй отвечает на сообщения
+    :return:
+    """
     global isParsingNow
 
     if not isParsingNow:
