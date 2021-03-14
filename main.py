@@ -1,10 +1,10 @@
 from telebot import types
 import parserpro
-from db import insert, IsNewClient, BuysCount, NewOrder, Orders, dbstart
+from db import insert, IsNewClient, BuysCount, NewOrder, Orders, dbstart, NewParseOrder, getOrderStatus
 from cities import cities
-from messagesControl import mainmenu, welcome, edit, send, senddoc
+from messagesControl import mainmenu, welcome, edit, send
 from botStarter import bot
-
+from ParseManager import GoParse
 
 def isCityTrue(name):
     """
@@ -56,15 +56,13 @@ def texthandler(message):
             send(chatid, new_message)
     elif chatid in valuesend:
         valuesend.remove(chatid)
-        new_message = 'Парсер запущен, осталось только подождать!'
+        new_message = 'Заявка добавлена в очередь, осталось только подождать!\nДля перехода на главную отправь /start'
         send(chatid, new_message)
         value = message.text
         print('DATA: ', city[chatid], value, str(chatid))
-        NewOrder(chatid, city[chatid], cityRus[chatid], value)
-        parserpro.main(city[chatid], value, str(chatid))
-        new_message = 'Готово, держи свой csv!'
-        send(chatid, new_message)
-        senddoc(chatid, value)
+        parse_id = NewParseOrder(city[chatid], value)
+        NewOrder(chatid, city[chatid], cityRus[chatid], value, parse_id)
+        GoParse()
         mainmenu(chatid)
     else:
         new_message = 'Я тебя не понял!'
@@ -93,7 +91,7 @@ def answer(message):
     elif message.data == 'profile':
         try:
             menu = types.InlineKeyboardMarkup()
-            new_message = "Ваш id: " + str(chatid) + "\nКол-во заказов: " + str(BuysCount(chatid))
+            new_message = "*👨🏽‍💻Профиль*\n\nВаш id: " + str(chatid) + "\nКол-во заказов: " + str(BuysCount(chatid))
             menu.add(types.InlineKeyboardButton(text="назад", callback_data="retmainmenu"))
             edit(chatid, message.message.message_id, new_message, menu)
         except Exception as e:
@@ -101,16 +99,17 @@ def answer(message):
     elif message.data == 'history':
         try:
             menu = types.InlineKeyboardMarkup()
+            new_message = '*🗒История*\n\n'
             if BuysCount(chatid) == 0:
-                new_message = 'У вас нет заказов!'
+                new_message += 'У вас нет заказов!'
             else:
-                new_message = 'Ваши заказы:\n'
-                for orderid, CityRus, orderData, isFinished in Orders(chatid):
+                new_message += 'Ваши заказы:\n'
+                for orderid, CityRus, orderData, parse_id in Orders(chatid):
                     new_message += "*#" + str(orderid) + "*\n" + str(CityRus) + ": " + str(orderData) + "\nСтатус: "
-                    if isFinished == 0:
-                        new_message += "В очереди❌\n\n"
-                    else:
+                    if getOrderStatus(parse_id):
                         new_message += "Отправлен✅\n\n"
+                    else:
+                        new_message += "В очереди⏳\n\n"
             menu.add(types.InlineKeyboardButton(text="назад", callback_data="retmainmenu"))
             edit(chatid, message.message.message_id, new_message, menu)
         except Exception as e:

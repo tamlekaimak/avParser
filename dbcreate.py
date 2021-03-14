@@ -26,9 +26,21 @@ def createTables():
         city NVARCHAR(100) NOT NULL,
         cityRus NVARCHAR(100) NOT NULL,
         orderData NVARCHAR(100) NOT NULL,
-        isFinished int NOT NULL DEFAULT (0),
-        FOREIGN KEY(chatid) REFERENCES Clients(chatid)
+        parse_id INTEGER NOT NULL,
+        FOREIGN KEY(chatid) REFERENCES Clients(chatid),
+        FOREIGN KEY(parse_id) REFERENCES ParseOrder(parse_id)
     );
     """)
+    cursor.execute(query)
+    connection.commit()
+
+    query = ("""    
+        CREATE TABLE ParseOrder(
+            parse_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            city NVARCHAR(100) NOT NULL,
+            orderData NVARCHAR(100) NOT NULL,
+            isFinished int NOT NULL DEFAULT (0)
+        );
+        """)
     cursor.execute(query)
     connection.commit()
