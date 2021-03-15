@@ -5,10 +5,10 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
-import cfscrape
+import cfscrape # благодаря этой библиотеке мы обходим защиту от ддос(Cloud Flare ) атак Авито
 
 
-def get_session():
+def get_session():# создаем  сессию для запросов, вместо стандартного headers файла requests,для того, чтобы сервер считал что мы не бот, а обычный юзер
     session = requests.Session()
     session.headers = {
         'Host':'www.avito.ru',
