@@ -35,7 +35,11 @@ def delete_symbol(str):
 
 
 
-def get_page_data(html,name_file,user_id):
+def get_page_data(html,user_id):
+    api_sellerJson_1 = "https://m.avito.ru/api/14/items/"
+    api_sellerJson_2 = "?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view"
+    api_phone_1 = "https://m.avito.ru/api/1/items/"
+    api_phone_2 = "/phone?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir"
     soup = BeautifulSoup(html, 'lxml')
     ads = soup.find_all('div', class_='iva-item-body-NPl6W')
     date=''
@@ -44,40 +48,64 @@ def get_page_data(html,name_file,user_id):
         try:
             title = ad.find('a').text.strip()
         except:
-            title = ''
+            title="none"
         try:
             pr = ad.find('span', class_='price-text-1HrJ_ text-text-1PdBw text-size-s-1PUdo').text.strip()
             price = delete_symbol(pr) + 'р.'
         except:
-            price = ''    
+            price = 'none'
         try:
             url = 'https://www.avito.ru/' + ad.find('a').get('href').strip()
         except:
-            url = '' 
+            url = 'none'
         try:
             date = ad.find('div', class_="date-text-2jSvU text-text-1PdBw text-size-s-1PUdo text-color-noaccent-bzEdI").text.strip()
         except:
-            date=''
+            date='none'
         Data=Data.append({'title': title,
                     'price': price,
                     'date': date,
                     'url': url, },
                         ignore_index=True)
 
-    Data.to_csv('Объявления/'+name_file+"__"+user_id+".csv",encoding="cp1251",)
-    return name_file
-    
-def main(g_city,search,user_id):
+    # Data.to_csv('Объявления/'+name_file+"__"+user_id+".csv",encoding="cp1251",)
+    return Data
+
+def all_pages_parser(pagesNumber,g_city,search,user_id):
     main_url = "https://www.avito.ru/"
-    mainurl_no_pages = main_url+g_city+"?"
-    dopurl_no_pages = "q="+search.replace(' ', '+')
-    url_gen = mainurl_no_pages+dopurl_no_pages
-    html = get_html(url_gen)
+    mainurl = main_url + g_city + "?"+"p=1&"
+
+    dopurl = "q=" + search.replace(' ', '+')
+    mainDF=pd.DataFrame(columns=['title','price','date','phone','pages','url'])
+    for i in range(pagesNumber):
+        # Генерируем URL для функции get_page_data
+        url_gen = mainurl[:len(mainurl)-2] +str(i)+'&'+ dopurl
+        session=get_session()
+        # Взять информацию из страницы
+        page_df=get_page_data(get_html(url_gen))
+
+        # Взять информацию через API о пользователе
+
+
+def get_pages_number(html):
+    soup = BeautifulSoup(html, 'lxml')
+    try:
+        pages = soup.find_all('span', class_='pagination-item-1WyVp')[-2].get('data-marker')
+        p = pages.split('(')[1].split(')')[0]
+    except:
+        p = 1
+    return pages
+
+def main(g_city,search,user_id):
+    result=all_pages_parser(g_city=g_city,search=search,user_id=user_id,pagesNumber=get_pages_number(get_html(
+        "https://www.avito.ru/" + g_city + "?" + "q=" + search.replace(' ', '+')
+    )))
+
     page = get_page_data(html,search,user_id)
     print('Excel файл \'' + page + '.csv\' успешно создан! ')
 
 
 if(__name__=="__main__"):
-    main("kazan","Ильдан",'1')
+    main("kazan","Апельсины",'1')
 
 # >>>>>>> 9a6929b207372c3b501b52fe0dca4f5761164901
