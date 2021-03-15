@@ -1,15 +1,11 @@
-
-# тут будет код для парсера
-# -*- coding: utf-8 -*-
 import json
 import time
-
+import random
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
 import cfscrape
-import openpyxl
 
 
 def get_session():
@@ -27,6 +23,7 @@ def get_session():
         'Cache-Control':'no-cache'}
     return cfscrape.create_scraper(sess=session)
 
+
 def get_html(url):#возвращает html код
     session = get_session()
     htmlbody = session.get(url)
@@ -35,12 +32,11 @@ def get_html(url):#возвращает html код
 
 
 def delete_symbol(str):
-    return re.sub(r'[^0-9.]+', r'', str)#удаляет ненужные символы с номера
+    return re.sub(r'[^0-9.]+', r'', str)  #удаляет ненужные символы с номера
 
 
 
-def get_page_data(html,g_city):
-    isEnd=False
+def get_page_data(html,g_city,counter):
     api_sellerJson_1 = "https://m.avito.ru/api/14/items/"
     api_sellerJson_2 = "?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view"
     api_phone_1 = "https://m.avito.ru/api/1/items/"
@@ -48,19 +44,19 @@ def get_page_data(html,g_city):
     soup = BeautifulSoup(html, 'lxml')
     ads = soup.find_all('div', class_='iva-item-body-NPl6W')
     date=''
-    pages = 'Нету информации'
-    seller_rating = 'Нету информации'
-    seller_name = 'Нету информации'
-    description = 'Нету информации'
-    phone='Нету информации'
     Data=pd.DataFrame(columns=['Заголовок','Цена','Описание','Имя_Продавца','Рейтинг','Дата','Телефон','Кол-во объяв','url',"Просмотры"])
-    counter=1
-    session = get_session()
+    prevrandom=random.randint(1,5)
     for ad in ads:
-        if(counter%50==0):
-            session=get_session()
-            print('Подождите 30 секунд')
-            time.sleep(30)
+        session = get_session()
+        while(True):
+            randomn=random.randint(0,2)+0.5
+            if(random!=prevrandom):
+                break;
+        prevrandom=randomn
+        time.sleep(randomn)
+        if(counter%30==0):
+            print('Подождите 10 секунд')
+            time.sleep(3)
             counter=counter+1;
         try:
             url = 'https://www.avito.ru/' + ad.find('a').get('href').strip()
@@ -91,23 +87,23 @@ def get_page_data(html,g_city):
             try:
                 total=jsonfile["stats"]['views']['total']
             except:
-                total='Нету информации'
+                total='Нет информации'
             try:
                 seller_rating = jsonfile["seller"]["rating"]["score"]
             except:
-                seller_rating='Нету информации'
+                seller_rating='Нет информации'
             try:
                 seller_name = jsonfile["seller"]["name"]
             except:
-                seller_name='Нету информации'
+                seller_name='Нет информации'
             try:
                 description = jsonfile["description"]
             except:
-                description='Нету информации'
+                description='Нет информации'
             try:
                 pages=jsonfile['seller']['summary'].split(' ')[0]
             except:
-                pages='Нету информации'
+                pages='Нет информации'
             try:
                 phone=json.loads(session.get('https://m.avito.ru/api/1/items/'+id+'/phone?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view').text)
                 print(phone)
@@ -116,8 +112,8 @@ def get_page_data(html,g_city):
                 elif(phone['result']['action']['uri'].find('authenticate')!=-1):
                     phone='Необходима авторизация'
                 else:
-                    phone='Нету информации'
-            except: phone='Нету информации'
+                    phone='Нет информации'
+            except: phone='Нет информации'
             try:
                 date = ad.find('div',
                                class_="date-text-2jSvU text-text-1PdBw text-size-s-1PUdo text-color-noaccent-bzEdI").text.strip()
@@ -135,19 +131,20 @@ def get_page_data(html,g_city):
                             'Телефон':phone,
                             'url': url, },
                             ignore_index=True)
-    return Data
+    return Data,counter
 
 def all_pages_parser(pagesNumber,g_city,search,chat_id,filters):
     main_url = "https://www.avito.ru/"
     mainurl = main_url + g_city + "?"+"p=1&"
     print('Объявлений:', pagesNumber)
     dopurl = "q=" + search.replace(' ', '+')
+    counter=1;
     mainDF=pd.DataFrame(columns=['Заголовок','Цена','Описание','Имя_Продавца','Рейтинг','Дата','Телефон','Кол-во объяв','url',"Просмотры"])
-    for i in range(1):
+    for i in range(pagesNumber):
         # Генерируем URL для функции get_page_data
         url_gen = mainurl[:len(mainurl)-2] +str(i)+'&'+ dopurl
         # Взять информацию из страницы
-        page_df=get_page_data(get_html(url_gen),g_city)
+        page_df,counter=get_page_data(get_html(url_gen),g_city,counter=counter)
         mainDF=mainDF.append(page_df)
     for i in filters.keys():
         if(filters[i]):
@@ -172,6 +169,6 @@ def main(g_city,search,user_id,isRating,isAdsNumber,isViews):
 
 
 if(__name__=="__main__"):
-    main("kazan","ноутбук",'1',1,1,1)
+    main("kazan","Ford Mustang",'1',0,0,0)
 
 # >>>>>>> 9a6929b207372c3b501b52fe0dca4f5761164901

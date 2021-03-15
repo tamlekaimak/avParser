@@ -135,6 +135,7 @@ def UpdateOrderStatus(orderid):
     query = "UPDATE Orders SET isFinished = 1 WHERE orderid = " + str(orderid)
     cursor.execute(query)
     connection.commit()
+    connection.close()
 
 
 def ParseOrder():
@@ -148,7 +149,7 @@ def ParseOrder():
             "SELECT MIN(orderid) FROM Orders WHERE isFinished = 0) "
     cursor.execute(query)
     result = cursor.fetchone()
-
+    connection.close()
     return result[0], result[1], result[2], result[3], result[4], result[5]
 
 
@@ -162,7 +163,9 @@ def getChatid(orderid):
     cursor = connection.cursor()
     query = "SELECT chatid FROM Orders WHERE orderid = " + str(orderid)
     cursor.execute(query)
-    return cursor.fetchone()[0]
+    res = cursor.fetchone()[0]
+    connection.close()
+    return res
 
 
 def isMoreOrders():
@@ -175,6 +178,7 @@ def isMoreOrders():
     query = "SELECT orderid FROM Orders WHERE isFinished = 0"
     cursor.execute(query)
     result = cursor.fetchone()
+    connection.close()
     if result:
         return True
     else:
@@ -192,6 +196,7 @@ def getOrderStatus(orderid):
     query = "SELECT isFinished FROM Orders WHERE orderid = " + str(orderid)
     cursor.execute(query)
     result = cursor.fetchone()[0]
+    connection.close()
     if result == 1:
         return True
     else:
@@ -204,6 +209,7 @@ def getParseAmount(chatid):
     query = "SELECT parseAmount FROM Clients WHERE chatid = " + str(chatid)
     cursor.execute(query)
     result = cursor.fetchone()[0]
+    connection.close()
     return result
 
 
@@ -223,7 +229,7 @@ def UpdateBillStatus(bill_data):
     query = "UPDATE PayBills SET isPayed = 1 WHERE bill_data = '" + str(bill_data) + "'"
     cursor.execute(query)
     connection.commit()
-
+    connection.close()
 
 def getBillid(chatid):
     connection = connectDB()
@@ -231,6 +237,7 @@ def getBillid(chatid):
     query = "SELECT bill_data FROM PayBills WHERE isPayed = 0 and chatid = " + str(chatid)
     cursor.execute(query)
     result = cursor.fetchone()[0]
+    connection.close()
     return result
 
 
@@ -240,6 +247,7 @@ def setRejectedStatus(bill_data):
     query = "UPDATE PayBills SET isPayed = -1 WHERE bill_data = '" + str(bill_data) + "'"
     cursor.execute(query)
     connection.commit()
+    connection.close()
 
 
 def lastBillAmount(chatid):
@@ -250,6 +258,7 @@ def lastBillAmount(chatid):
         chatid) + ") "
     cursor.execute(query)
     result = cursor.fetchone()[0]
+    connection.close()
     return result
 
 
@@ -259,6 +268,7 @@ def updateParseAmount(chatid, ParseAmount):
     query = "UPDATE Clients SET ParseAmount = " + str(ParseAmount) + " WHERE chatid = " + str(chatid) + ""
     cursor.execute(query)
     connection.commit()
+    connection.close()
 
 
 def minusOneParse(chatid):
@@ -267,3 +277,4 @@ def minusOneParse(chatid):
     query = "UPDATE Clients SET ParseAmount = ParseAmount - 1 WHERE chatid = " + str(chatid) + ""
     cursor.execute(query)
     connection.commit()
+    connection.close()

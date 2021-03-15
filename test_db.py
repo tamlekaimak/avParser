@@ -23,8 +23,8 @@ TEST_SELECT_OLD_VALUES = [(100,'Genaaaa'), (120,'Pashaaaa')]
 
 
 
-TEST_CREATE_ORDER = [(123, 'Kazan', 'Казань', 'Самокат', 1), (234, 'Samara', 'Самара', 'Самокат', 2)]
-TEST_CREATE_ORDER_PK = [(123131, 'Kazan', 'Казань', 'Самокат', 1),(123131, 'Samara', 'Самара', 'Самокат', 3)]
+TEST_CREATE_ORDER = [(123, 'Kazan', 'Казань', 'Самокат', 1,123,23), (234, 'Samara', 'Самара', 'Самокат', 2,213,1)]
+TEST_CREATE_ORDER_PK = [(123131, 'Kazan', 'Казань', 'Самокат', 1,213,3),(123131, 'Samara', 'Самара', 'Самокат', 3,23,3)]
 
 TEST_PARSE_ORDER = [i[1::2] for i in TEST_CREATE_ORDER_PK]
 
@@ -35,20 +35,27 @@ def clean_():
     conn.commit()
     cursor.execute("Delete from Orders where chatid in (1,123,234,123131,123132);")
     conn.commit()
-    cursor.execute("Delete from ParseOrder;")
-    conn.commit()
     conn.close()
 
+if __name__ == "__main__":
+    connection = db.connect("darkDB.db")
+    cursor = connection.cursor()
+    query = ("""Select * from Orders;
+                """)
+    cursor.execute(query)
+    result = cursor.fetchall()
+    connection.close()
+    print(result)
+    #clean_()
 
 class TestDatabase:
 
-    @pytest.fixture(scope='session')
-    def fin(self):
-        clean_()
-        yield
-        clean_()
+    # @pytest.fixture(scope='session')
+    # def fin(self):
+    #     clean_()
+    #     yield
+    #     clean_()
 
-    @pytest.mark.xpass
     @pytest.mark.parametrize("chatid, username", TEST_INSERT_CORRECT_VALUES)
     def test_insert_correct(self, chatid, username):
         insert(chatid, username)
@@ -62,8 +69,8 @@ class TestDatabase:
     def test_order_count_empty(self, chatid, username):
         assert BuysCount(chatid) == 0
 
-    @pytest.mark.parametrize("chatid, city, cityRus, orderData, parse_id", TEST_CREATE_ORDER)
-    def test_order_create(self, chatid, city, cityRus, orderData, parse_id):
+    @pytest.mark.parametrize("chatid, city, cityRus, orderData, Amount, Rating, Views", TEST_CREATE_ORDER)
+    def test_order_create(self, chatid, city, cityRus, orderData, Amount, Rating, Views):
         """
         Test could we add a new client to our db and
         :param chatid: id пользователя
@@ -73,11 +80,11 @@ class TestDatabase:
         :param parse_id: id заказа (в очереди парсера)
         :return:
         """
-        NewOrder(chatid, city, cityRus, orderData, parse_id)
+        NewOrder(chatid, city, cityRus, orderData, Amount, Rating, Views)
 
 
-    @pytest.mark.parametrize("chatid, city, cityRus, orderData, parse_id", TEST_CREATE_ORDER_PK)
-    def test_order_create_pk(self, chatid, city, cityRus, orderData, parse_id):
+    @pytest.mark.parametrize("chatid, city, cityRus, orderData, Amount, Rating, Views", TEST_CREATE_ORDER_PK)
+    def test_order_create_pk(self, chatid, city, cityRus, orderData, Amount, Rating, Views):
         """
         Test could we add a new client to our db and
         :param chatid: id пользователя
@@ -87,16 +94,16 @@ class TestDatabase:
         :param parse_id: id заказа (в очереди парсера)
         :return:
         """
-        NewOrder(chatid, city, cityRus, orderData, parse_id)
+        NewOrder(chatid, city, cityRus, orderData, Amount, Rating, Views)
 
-    @pytest.mark.parametrize("chatid, city, cityRus, orderData, parse_id", TEST_CREATE_ORDER_PK)
-    def test_order_count_equal(self, chatid, city, cityRus, orderData, parse_id):
+    @pytest.mark.parametrize("chatid, city, cityRus, orderData, Amount, Rating, Views", TEST_CREATE_ORDER_PK)
+    def test_order_count_equal(self,chatid, city, cityRus, orderData, Amount, Rating, Views):
         assert BuysCount(chatid) == 2
 
 
-    @pytest.mark.parametrize("chatid, city, cityRus, orderData, parse_id", TEST_CREATE_ORDER_PK)
-    def test_order_chatid(self, chatid, city, cityRus, orderData, parse_id):
-        assert getChatid(parse_id) == chatid
+    @pytest.mark.parametrize("chatid, city, cityRus, orderData, Amount, Rating, Views", TEST_CREATE_ORDER_PK)
+    def test_order_chatid(self, chatid, city, cityRus, orderData, Amount, Rating, Views):
+        assert getChatid(72) == chatid
 
 
     @pytest.mark.xfail
@@ -128,14 +135,11 @@ class TestDatabase:
     def test_insert_incorrect(self, chatid, username):
         insert(chatid, username)
 
-
-    @pytest.mark.parametrize("city, orderData", TEST_PARSE_ORDER)
-    def test_create_parse_order(self, city, orderData):
-        NewParseOrder(city, orderData)
-
+    @pytest.mark.skip
     def test_is_more_parse_order(self):
         assert isMoreOrders() == True
 
+    @pytest.mark.skip
     @pytest.mark.parametrize("parse_id", [1, 2])
     def test_check_parse_order_status(self, parse_id):
         getOrderStatus(parse_id) == False
