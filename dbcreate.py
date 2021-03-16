@@ -30,6 +30,9 @@ def createTables():
         city NVARCHAR(100) NOT NULL,
         cityRus NVARCHAR(100) NOT NULL,
         orderData NVARCHAR(100) NOT NULL,
+        Amount int NOT NULL,
+        Rating int NOT NULL,
+        Views int NOT NULL,
         isFinished int NOT NULL DEFAULT (0),
         FOREIGN KEY(chatid) REFERENCES Clients(chatid)
     );

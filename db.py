@@ -87,7 +87,7 @@ def BuysCount(chatid):
     return buyscount
 
 
-def NewOrder(chatid, city, cityRus, orderData):
+def NewOrder(chatid, city, cityRus, orderData, Amount, Rating, Views):
     """
     Добавление новой заявки в БД
 
@@ -99,8 +99,9 @@ def NewOrder(chatid, city, cityRus, orderData):
     """
     connection = connectDB()
     cursor = connection.cursor()
-    query = ("INSERT INTO Orders (chatid, city, cityRus, orderData) VALUES (" + str(chatid) +
-             ", '" + str(city) + "', '" + str(cityRus) + "','" + str(orderData) + "')")
+    query = ("INSERT INTO Orders (chatid, city, cityRus, orderData, Amount, Rating, Views) VALUES (" + str(chatid) +
+             ", '" + str(city) + "', '" + str(cityRus) + "','" + str(orderData) + "', " + str(Amount) + ", " + str(
+                Rating) + ", " + str(Views) + ")")
     cursor = connection.cursor()
     cursor.execute(query)
     connection.commit()
@@ -143,12 +144,12 @@ def ParseOrder():
     """
     connection = connectDB()
     cursor = connection.cursor()
-    query = "SELECT orderid, city, orderData FROM Orders WHERE isFinished = 0 AND orderid = (SELECT MIN(" \
-            "orderid) FROM Orders WHERE isFinished = 0) "
+    query = "SELECT orderid, city, orderData, Amount, Rating, Views FROM Orders WHERE isFinished = 0 AND orderid = (" \
+            "SELECT MIN(orderid) FROM Orders WHERE isFinished = 0) "
     cursor.execute(query)
     result = cursor.fetchone()
 
-    return result[0], result[1], result[2]
+    return result[0], result[1], result[2], result[3], result[4], result[5]
 
 
 def getChatid(orderid):

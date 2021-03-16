@@ -21,10 +21,10 @@ def GoParse():
     if not isParsingNow:
         isParsingNow = True
         while True:
-            parse_id, city, value = ParseOrder()
+            parse_id, city, value, Amount, Rating, Views = ParseOrder()
             chatid = getChatid(parse_id)
 
-            parserpro.main(city, value, str(chatid))
+            parserpro.main(city, value, str(chatid), bool(int(Amount)), bool(int(Rating)), bool(int(Views)))
             UpdateOrderStatus(parse_id)
 
             send(chatid, 'Готово, держи свой csv!')

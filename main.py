@@ -6,6 +6,7 @@ from botStarter import bot
 from ParseManager import GoParse
 from payControl import QiwiPay, check_bill, kill_bill
 
+
 def isCityTrue(name):
     """
     Проверка города на валидность и отправка его английской версии
@@ -18,6 +19,14 @@ def isCityTrue(name):
     return False
 
 
+def removeSettings(chatid):
+    if chatid in AmountOn:
+        AmountOn.remove(chatid)
+    if chatid in ViewsOn:
+        ViewsOn.remove(chatid)
+    if chatid in RatingOn:
+        RatingOn.remove(chatid)
+
 # массив для проверки отправления города пользователем
 citysend = []
 # массив для проверки отправления города пользователем
@@ -26,6 +35,12 @@ valuesend = []
 city = {}
 # словарь в который записывается город перед отправкой в БД (на русском)
 cityRus = {}
+# словарь в который записывается товар, который нужно спарсить
+value = {}
+# массивы для доп параметров
+AmountOn = []
+RatingOn = []
+ViewsOn = []
 
 
 @bot.message_handler(commands=['start'])
@@ -56,14 +71,16 @@ def texthandler(message):
             send(chatid, new_message)
     elif chatid in valuesend:
         valuesend.remove(chatid)
-        new_message = 'Заявка добавлена в очередь, осталось только подождать!\nДля перехода на главную отправь /start'
-        send(chatid, new_message)
-        value = message.text
-        print('DATA: ', city[chatid], value, str(chatid))
-        NewOrder(chatid, city[chatid], cityRus[chatid], value)
-        minusOneParse(chatid)
-        GoParse()
-        mainmenu(chatid)
+        new_message = 'Выберите доп. параметры парсера:'
+        value[chatid] = message.text
+        menu = types.InlineKeyboardMarkup()
+        removeSettings(chatid)
+        menu.add(types.InlineKeyboardButton(text="Кол-во объявлений продавца: Выкл", callback_data="AmountOn"))
+        menu.add(types.InlineKeyboardButton(text="Рейтинг: Выкл", callback_data="RatingOn"))
+        menu.add(types.InlineKeyboardButton(text="Кол-во просмотров объявления: Выкл", callback_data="ViewsOn"))
+        menu.add(types.InlineKeyboardButton(text="Начать парсинг", callback_data="startParsing"))
+        menu.add(types.InlineKeyboardButton(text="отмена", callback_data="cancelsend"))
+        send(chatid, new_message, menu)
     else:
         new_message = 'Я тебя не понял!'
         send(chatid, new_message)
@@ -160,13 +177,94 @@ def answer(message):
             edit(chatid, message.message.message_id, new_message, menu)
         except Exception as e:
             print(message.data + ' Error: ', e)
+    elif message.data == 'AmountOn' or message.data == 'AmountOff':
+        try:
+            menu = types.InlineKeyboardMarkup()
+            new_message = 'Выберите доп. параметры парсера:'
+            if message.data == 'AmountOn':
+                AmountOn.append(chatid)
+                menu.add(types.InlineKeyboardButton(text="Кол-во объявлений продавца: Вкл", callback_data="AmountOff"))
+            else:
+                AmountOn.remove(chatid)
+                menu.add(types.InlineKeyboardButton(text="Кол-во объявлений продавца: Выкл", callback_data="AmountOn"))
+            if chatid in RatingOn:
+                menu.add(types.InlineKeyboardButton(text="Рейтинг: Вкл", callback_data="RatingOff"))
+            else:
+                menu.add(types.InlineKeyboardButton(text="Рейтинг: Выкл", callback_data="RatingOn"))
+            if chatid in ViewsOn:
+                menu.add(types.InlineKeyboardButton(text="Кол-во просмотров объявления: Вкл", callback_data="ViewsOff"))
+            else:
+                menu.add(types.InlineKeyboardButton(text="Кол-во просмотров объявления: Выкл", callback_data="ViewsOn"))
+            menu.add(types.InlineKeyboardButton(text="Начать парсинг", callback_data="startParsing"))
+            menu.add(types.InlineKeyboardButton(text="отмена", callback_data="cancelsend"))
+            edit(chatid, message.message.message_id, new_message, menu)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
+    elif message.data == 'RatingOn' or message.data == 'RatingOff':
+        try:
+            menu = types.InlineKeyboardMarkup()
+            new_message = 'Выберите доп. параметры парсера:'
+            if chatid in AmountOn:
+                menu.add(types.InlineKeyboardButton(text="Кол-во объявлений продавца: Вкл", callback_data="AmountOff"))
+            else:
+                menu.add(types.InlineKeyboardButton(text="Кол-во объявлений продавца: Выкл", callback_data="AmountOn"))
+            if message.data == 'RatingOn':
+                RatingOn.append(chatid)
+                menu.add(types.InlineKeyboardButton(text="Рейтинг: Вкл", callback_data="RatingOff"))
+            else:
+                RatingOn.remove(chatid)
+                menu.add(types.InlineKeyboardButton(text="Рейтинг: Выкл", callback_data="RatingOn"))
+            if chatid in ViewsOn:
+                menu.add(types.InlineKeyboardButton(text="Кол-во просмотров объявления: Вкл", callback_data="ViewsOff"))
+            else:
+                menu.add(types.InlineKeyboardButton(text="Кол-во просмотров объявления: Выкл", callback_data="ViewsOn"))
+            menu.add(types.InlineKeyboardButton(text="Начать парсинг", callback_data="startParsing"))
+            menu.add(types.InlineKeyboardButton(text="отмена", callback_data="cancelsend"))
+            edit(chatid, message.message.message_id, new_message, menu)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
+    elif message.data == 'ViewsOn' or message.data == 'ViewsOff':
+        try:
+            menu = types.InlineKeyboardMarkup()
+            new_message = 'Выберите доп. параметры парсера:'
+            if chatid in AmountOn:
+                menu.add(types.InlineKeyboardButton(text="Кол-во объявлений продавца: Вкл", callback_data="AmountOff"))
+            else:
+                menu.add(types.InlineKeyboardButton(text="Кол-во объявлений продавца: Выкл", callback_data="AmountOn"))
+            if chatid in RatingOn:
+                menu.add(types.InlineKeyboardButton(text="Рейтинг: Вкл", callback_data="RatingOff"))
+            else:
+                menu.add(types.InlineKeyboardButton(text="Рейтинг: Выкл", callback_data="RatingOn"))
+            if message.data == 'ViewsOn':
+                ViewsOn.append(chatid)
+                menu.add(types.InlineKeyboardButton(text="Кол-во просмотров объявления: Вкл", callback_data="ViewsOff"))
+            else:
+                ViewsOn.remove(chatid)
+                menu.add(types.InlineKeyboardButton(text="Кол-во просмотров объявления: Выкл", callback_data="ViewsOn"))
+            menu.add(types.InlineKeyboardButton(text="Начать парсинг", callback_data="startParsing"))
+            menu.add(types.InlineKeyboardButton(text="отмена", callback_data="cancelsend"))
+            edit(chatid, message.message.message_id, new_message, menu)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
+    elif message.data == 'startParsing':
+        try:
+            NewOrder(chatid, city[chatid], cityRus[chatid], value, int(chatid in AmountOn), int(chatid in RatingOn),
+                     int(chatid in ViewsOn))
+            minusOneParse(chatid)
+            GoParse()
+            new_message = 'Заявка добавлена в очередь, осталось только подождать!\nДля перехода на главную отправь ' \
+                          '/start '
+            send(chatid, new_message)
+            mainmenu(chatid, message.message.message_id)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
     elif message.data == 'cancelsend':
         try:
             if chatid in citysend:
                 citysend.remove(chatid)
             if chatid in valuesend:
                 valuesend.remove(chatid)
-
+            removeSettings(chatid)
             mainmenu(chatid, message.message.message_id)
         except Exception as e:
             print(message.data + ' Error: ', e)
