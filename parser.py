@@ -57,88 +57,73 @@ def get_page_data(html,user_id,g_city):
     counter=1
     session = get_session()
     for ad in ads:
-        if(counter%20==0):
+        if(counter%50==0):
             session=get_session()
             print('Подождите 30 секунд')
             time.sleep(30)
             counter=counter+1;
         try:
-            if(ad.find('span',class_='badge-root-7ygrf iva-item-badge-394ey badge-sizeXL-1RHe2 text-text-1PdBw text-size-s-1PUdo').text):
-                print(ad.find('span',class_='badge-root-7ygrf iva-item-badge-394ey badge-sizeXL-1RHe2 text-text-1PdBw text-size-s-1PUdo').text)
-                okay=False;
+            url = 'https://www.avito.ru/' + ad.find('a').get('href').strip()
+            if(url.find(g_city)==-1):
+                continue;
         except:
-            okay = True
-        if(okay):
+            url = 'none'
+        try:
+            title = ad.find('a').text.strip()
+        except:
+            title="none"
+        try:
+            pr = ad.find('span', class_='price-text-1HrJ_ text-text-1PdBw text-size-s-1PUdo').text.strip()
+            price = delete_symbol(pr) + 'р.'
+        except:
+            price = 'none'
+        if(url!='none'):
+            print(url[22:28])
+            counter = counter + 1;
+            print('counter:',counter)
+            id=url.split('_')[-1].split('?')[0]
+            print(id)
+            jsonfile=json.loads(session.get('https://m.avito.ru/api/14/items/'+id+'?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view').text)
             try:
-                url = 'https://www.avito.ru/' + ad.find('a').get('href').strip()
-                if(url.find(g_city)==-1):
-                    isEnd=True;
-                    break;
+                jsonfile['code']
+                error=True
             except:
-                url = 'none'
+                error=False
+            print("Заблокирован:",error)
             try:
-                title = ad.find('a').text.strip()
+                total=jsonfile["stats"]['views']['total']
             except:
-                title="none"
+                total='Нету информации'
             try:
-                pr = ad.find('span', class_='price-text-1HrJ_ text-text-1PdBw text-size-s-1PUdo').text.strip()
-                price = delete_symbol(pr) + 'р.'
+                seller_rating = jsonfile["seller"]["rating"]["score"]
             except:
-                price = 'none'
-            counter=counter+1;
-            print(counter)
-            print(url)
-            print(url.find(g_city))
-            if(url!='none'):
-                print('while good')
-                id=url.split('_')[-1].split('?')[0]
-                print(id)
-
-                jsonfile=json.loads(session.get('https://m.avito.ru/api/14/items/'+id+'?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view').text)
-                print(pages)
-                try:
-                    print(jsonfile)
-                    jsonfile['code']
-                    error=True
-                except:
-                    error=False
-                print("Заблокирован:",error)
-                try:
-                    total=jsonfile["stats"]['views']['total']
-                except:
-                    total='Нету информации'
-                try:
-                    seller_rating = jsonfile["seller"]["rating"]["score"]
-                except:
-                    seller_rating='Нету информации'
-                try:
-                    seller_name = jsonfile["seller"]["name"]
-                except:
-                    seller_name='Нету информации'
-                try:
-                    description = jsonfile["description"]
-                except:
-                    description='Нету информации'
-                try:
-                    pages=jsonfile['seller']['summary'].split(' ')[0]
-                except:
-                    pages='Нету информации'
-                time.sleep(0.2)
-                try:
-                    phone=json.loads(session.get('https://m.avito.ru/api/1/items/'+id+'/phone?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view').text)
-                    if(phone['result']['action']['uri'].find('number')!=-1):
-                        phone=phone['result']['action']['uri'][-11:]
-                    elif(phone['result']['action']['uri'].find('authenticate')!=-1):
-                        phone='Необходима авторизация'
-                    else:
-                        phone='Нету информации'
-                except: phone='Нету информации'
-                time.sleep(0.2)
+                seller_rating='Нету информации'
             try:
-                date = ad.find('div', class_="date-text-2jSvU text-text-1PdBw text-size-s-1PUdo text-color-noaccent-bzEdI").text.strip()
+                seller_name = jsonfile["seller"]["name"]
             except:
-                date='none'
-
+                seller_name='Нету информации'
+            try:
+                description = jsonfile["description"]
+            except:
+                description='Нету информации'
+            try:
+                pages=jsonfile['seller']['summary'].split(' ')[0]
+            except:
+                pages='Нету информации'
+            try:
+                phone=json.loads(session.get('https://m.avito.ru/api/1/items/'+id+'/phone?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view').text)
+                if(phone['result']['action']['uri'].find('number')!=-1):
+                    phone=phone['result']['action']['uri'][-11:]
+                elif(phone['result']['action']['uri'].find('authenticate')!=-1):
+                    phone='Необходима авторизация'
+                else:
+                    phone='Нету информации'
+            except: phone='Нету информации'
+            try:
+                date = ad.find('div',
+                               class_="date-text-2jSvU text-text-1PdBw text-size-s-1PUdo text-color-noaccent-bzEdI").text.strip()
+            except:
+                date = 'none'
             Data=Data.append({
                             'Заголовок': title,
                             'Кол-во объяв':pages,
@@ -151,23 +136,21 @@ def get_page_data(html,user_id,g_city):
                             'Телефон':phone,
                             'url': url, },
                             ignore_index=True)
-    # Data.to_csv('Объявления/'+name_file+"__"+user_id+".csv",encoding="cp1251",)
-    return Data,isEnd
+    return Data
 
 def all_pages_parser(pagesNumber,g_city,search,user_id):
     main_url = "https://www.avito.ru/"
     mainurl = main_url + g_city + "?"+"p=1&"
-
+    print('Объявлений:', pagesNumber)
     dopurl = "q=" + search.replace(' ', '+')
     mainDF=pd.DataFrame(columns=['Заголовок','Цена','Описание','Имя_Продавца','Рейтинг','Дата','Телефон','Кол-во объяв','url',"Просмотры"])
     for i in range(pagesNumber):
         # Генерируем URL для функции get_page_data
         url_gen = mainurl[:len(mainurl)-2] +str(i)+'&'+ dopurl
         # Взять информацию из страницы
-        page_df,isEnd=get_page_data(get_html(url_gen),user_id,g_city)
+        page_df=get_page_data(get_html(url_gen),user_id,g_city)
         mainDF=mainDF.append(page_df)
-        if(isEnd):
-            break;
+
     mainDF.to_excel('Объявления/'+search+"_"+g_city+"_"+user_id+'.xlsx',sheet_name='Объявления',index=False,engine='openpyxl')
 
 def get_pages_number(html):
@@ -180,7 +163,6 @@ def get_pages_number(html):
     return p
 
 def main(g_city,search,user_id):
-    g_city,search,user_id='kazan','Пиво',1
     all_pages_parser(g_city=g_city,search=search,user_id=user_id,pagesNumber=int(get_pages_number(get_html(
         "https://www.avito.ru/" + g_city + "?" + "q=" + search.replace(' ', '+')
     ))))
@@ -188,6 +170,6 @@ def main(g_city,search,user_id):
 
 
 if(__name__=="__main__"):
-    main("kazan","Camaro",'1')
+    main("kazan","Приора",'1')
 
 # >>>>>>> 9a6929b207372c3b501b52fe0dca4f5761164901
