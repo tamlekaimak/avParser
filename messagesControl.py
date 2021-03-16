@@ -67,7 +67,7 @@ def senddoc(chatid, value):
     :return: при успешной отправке True, иначе False
     """
     try:
-        bot.send_document(chatid, open('csv//' + value + str(chatid) + '.csv', 'rb'))
+        bot.send_document(chatid, open('Объявления//' + value + str(chatid) + '.xlsx', 'rb'))
     except Exception as e:
         print(e)
         return False

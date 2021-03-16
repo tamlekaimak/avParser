@@ -248,14 +248,14 @@ def answer(message):
             print(message.data + ' Error: ', e)
     elif message.data == 'startParsing':
         try:
-            NewOrder(chatid, city[chatid], cityRus[chatid], value, int(chatid in AmountOn), int(chatid in RatingOn),
+            NewOrder(chatid, city[chatid], cityRus[chatid], value[chatid], int(chatid in AmountOn), int(chatid in RatingOn),
                      int(chatid in ViewsOn))
             minusOneParse(chatid)
-            GoParse()
             new_message = 'Заявка добавлена в очередь, осталось только подождать!\nДля перехода на главную отправь ' \
                           '/start '
-            send(chatid, new_message)
-            mainmenu(chatid, message.message.message_id)
+            edit(chatid, message.message.message_id, new_message)
+            mainmenu(chatid)
+            GoParse()
         except Exception as e:
             print(message.data + ' Error: ', e)
     elif message.data == 'cancelsend':

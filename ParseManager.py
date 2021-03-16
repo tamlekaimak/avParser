@@ -24,7 +24,7 @@ def GoParse():
             parse_id, city, value, Amount, Rating, Views = ParseOrder()
             chatid = getChatid(parse_id)
 
-            parserpro.main(city, value, str(chatid), bool(int(Amount)), bool(int(Rating)), bool(int(Views)))
+            parserpro.main(city, value, str(chatid), int(Amount), int(Rating), int(Views))
             UpdateOrderStatus(parse_id)
 
             send(chatid, 'Готово, держи свой csv!')
