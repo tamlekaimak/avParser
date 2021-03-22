@@ -87,7 +87,7 @@ def BuysCount(chatid):
     return buyscount
 
 
-def NewOrder(chatid, city, cityRus, orderData, parse_id):
+def NewOrder(chatid, city, cityRus, orderData, Amount, Rating, Views):
     """
     Добавление новой заявки в БД
 
@@ -95,13 +95,13 @@ def NewOrder(chatid, city, cityRus, orderData, parse_id):
     :param city: город на английском (для парсера)
     :param cityRus: город на русском
     :param orderData: название товара, который нужно спарсить
-    :param parse_id: id заказа (в очереди парсера)
     :return:
     """
     connection = connectDB()
     cursor = connection.cursor()
-    query = ("INSERT INTO Orders (chatid, city, cityRus, parse_id, orderData) VALUES (" + str(chatid) +
-             ", '" + str(city) + "', '" + str(cityRus) + "'," + str(parse_id) + ",'" + str(orderData) + "')")
+    query = ("INSERT INTO Orders (chatid, city, cityRus, orderData, Amount, Rating, Views) VALUES (" + str(chatid) +
+             ", '" + str(city) + "', '" + str(cityRus) + "','" + str(orderData) + "', " + str(Amount) + ", " + str(
+                Rating) + ", " + str(Views) + ")")
     cursor = connection.cursor()
     cursor.execute(query)
     connection.commit()
@@ -117,44 +117,22 @@ def Orders(chatid):
     """
     connection = connectDB()
     cursor = connection.cursor()
-    query = ("SELECT orderid, cityRus, orderData, parse_id FROM Orders WHERE chatid = %s;" % chatid)
+    query = ("SELECT orderid, cityRus, orderData, orderid FROM Orders WHERE chatid = %s;" % chatid)
     cursor.execute(query)
     result = cursor.fetchall()
     connection.close()
     return result
 
 
-def NewParseOrder(city, orderData):
-    """
-    Добавление новой заявки на парсинг в БД
-
-    :param city: город
-    :param orderData: товар который нужно спарсить
-    :return: id этого заказа
-    """
-    connection = connectDB()
-    cursor = connection.cursor()
-    query = ("INSERT INTO ParseOrder (city, orderData) VALUES ('" + str(city) + "', '" + str(orderData) + "')")
-    cursor.execute(query)
-    connection.commit()
-
-    query = "SELECT MAX(parse_id) FROM ParseOrder"
-    cursor.execute(query)
-    parse_id = cursor.fetchone()[0]
-
-    connection.close()
-    return parse_id
-
-
-def UpdateOrderStatus(parse_id):
+def UpdateOrderStatus(orderid):
     """
     Обновление статуса заказа
-    :param parse_id: id заказа
+    :param orderid: id заказа
     :return:
     """
     connection = connectDB()
     cursor = connection.cursor()
-    query = "UPDATE ParseOrder SET isFinished = 1 WHERE parse_id = " + str(parse_id)
+    query = "UPDATE Orders SET isFinished = 1 WHERE orderid = " + str(orderid)
     cursor.execute(query)
     connection.commit()
 
@@ -166,23 +144,23 @@ def ParseOrder():
     """
     connection = connectDB()
     cursor = connection.cursor()
-    query = "SELECT parse_id, city, orderData FROM ParseOrder WHERE isFinished = 0 AND parse_id = (SELECT MIN(" \
-            "parse_id) FROM ParseOrder WHERE isFinished = 0) "
+    query = "SELECT orderid, city, orderData, Amount, Rating, Views FROM Orders WHERE isFinished = 0 AND orderid = (" \
+            "SELECT MIN(orderid) FROM Orders WHERE isFinished = 0) "
     cursor.execute(query)
     result = cursor.fetchone()
 
-    return result[0], result[1], result[2]
+    return result[0], result[1], result[2], result[3], result[4], result[5]
 
 
-def getChatid(parse_id):
+def getChatid(orderid):
     """
     Находит chatid по id заказа
-    :param parse_id: id заказа
+    :param orderid: id заказа
     :return: chatid пользователя
     """
     connection = connectDB()
     cursor = connection.cursor()
-    query = "SELECT chatid FROM Orders WHERE parse_id = " + str(parse_id)
+    query = "SELECT chatid FROM Orders WHERE orderid = " + str(orderid)
     cursor.execute(query)
     return cursor.fetchone()[0]
 
@@ -194,7 +172,7 @@ def isMoreOrders():
     """
     connection = connectDB()
     cursor = connection.cursor()
-    query = "SELECT parse_id FROM ParseOrder WHERE isFinished = 0"
+    query = "SELECT orderid FROM Orders WHERE isFinished = 0"
     cursor.execute(query)
     result = cursor.fetchone()
     if result:
@@ -203,15 +181,15 @@ def isMoreOrders():
         return False
 
 
-def getOrderStatus(parse_id):
+def getOrderStatus(orderid):
     """
     Возвращает статус заказа
-    :param parse_id: id заказа
+    :param orderid: id заказа
     :return: True если заказ спарсен, иначе False
     """
     connection = connectDB()
     cursor = connection.cursor()
-    query = "SELECT isFinished FROM ParseOrder WHERE parse_id = " + str(parse_id)
+    query = "SELECT isFinished FROM Orders WHERE orderid = " + str(orderid)
     cursor.execute(query)
     result = cursor.fetchone()[0]
     if result == 1:
@@ -219,3 +197,76 @@ def getOrderStatus(parse_id):
     else:
         return False
 
+<<<<<<< HEAD
+=======
+
+def getParseAmount(chatid):
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = "SELECT parseAmount FROM Clients WHERE chatid = " + str(chatid)
+    cursor.execute(query)
+    result = cursor.fetchone()[0]
+    return result
+
+
+def newBill(bill_data, chatid, parseAmount):
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = ("INSERT INTO PayBills (bill_data, chatid, parseAmount) VALUES ('" + str(bill_data) + "', " + str(chatid) + ", " + str(parseAmount) + ")")
+    cursor = connection.cursor()
+    cursor.execute(query)
+    connection.commit()
+    connection.close()
+
+
+def UpdateBillStatus(bill_data):
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = "UPDATE PayBills SET isPayed = 1 WHERE bill_data = '" + str(bill_data) + "'"
+    cursor.execute(query)
+    connection.commit()
+
+
+def getBillid(chatid):
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = "SELECT bill_data FROM PayBills WHERE isPayed = 0 and chatid = " + str(chatid)
+    cursor.execute(query)
+    result = cursor.fetchone()[0]
+    return result
+
+
+def setRejectedStatus(bill_data):
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = "UPDATE PayBills SET isPayed = -1 WHERE bill_data = '" + str(bill_data) + "'"
+    cursor.execute(query)
+    connection.commit()
+
+
+def lastBillAmount(chatid):
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = "SELECT ParseAmount FROM PayBills WHERE chatid = " + str(chatid) + " AND bill_id = (SELECT MAX(bill_id) " \
+                                                                               "FROM PayBills WHERE chatid = " + str(
+        chatid) + ") "
+    cursor.execute(query)
+    result = cursor.fetchone()[0]
+    return result
+
+
+def updateParseAmount(chatid, ParseAmount):
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = "UPDATE Clients SET ParseAmount = " + str(ParseAmount) + " WHERE chatid = " + str(chatid) + ""
+    cursor.execute(query)
+    connection.commit()
+
+
+def minusOneParse(chatid):
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = "UPDATE Clients SET ParseAmount = ParseAmount - 1 WHERE chatid = " + str(chatid) + ""
+    cursor.execute(query)
+    connection.commit()
+>>>>>>> 0489e3fead170cd8c8cc0b8a983112fde1cc9fbc

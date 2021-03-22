@@ -30,20 +30,24 @@ def createTables():
         city NVARCHAR(100) NOT NULL,
         cityRus NVARCHAR(100) NOT NULL,
         orderData NVARCHAR(100) NOT NULL,
-        parse_id INTEGER NOT NULL,
-        FOREIGN KEY(chatid) REFERENCES Clients(chatid),
-        FOREIGN KEY(parse_id) REFERENCES ParseOrder(parse_id)
+        Amount int NOT NULL,
+        Rating int NOT NULL,
+        Views int NOT NULL,
+        isFinished int NOT NULL DEFAULT (0),
+        FOREIGN KEY(chatid) REFERENCES Clients(chatid)
     );
     """)
     cursor.execute(query)
     connection.commit()
 
     query = ("""    
-        CREATE TABLE ParseOrder(
-            parse_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            city NVARCHAR(100) NOT NULL,
-            orderData NVARCHAR(100) NOT NULL,
-            isFinished int NOT NULL DEFAULT (0)
+        CREATE TABLE PayBills(
+            bill_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bill_data NVARCHAR(100) NOT NULL,
+            parseAmount int NOT NULL,
+            chatid int NOT NULL,
+            isPayed int NOT NULL DEFAULT (0),
+            FOREIGN KEY(chatid) REFERENCES Clients(chatid)
         );
         """)
     cursor.execute(query)
