@@ -7,7 +7,7 @@ from ParseManager import GoParse
 from payControl import QiwiPay, check_bill, kill_bill
 
 
-<<<<<<< HEAD
+
 
 # открываем json файл и считываем оттуда токен бота
 with open('token.json', 'r', encoding='utf-8') as f:
@@ -18,8 +18,6 @@ bot = telebot.AsyncTeleBot(botToken)
 
 print("BOT STARTED!")
 
-=======
->>>>>>> 0489e3fead170cd8c8cc0b8a983112fde1cc9fbc
 def isCityTrue(name):
     """
     Проверка города на валидность и отправка его английской версии
