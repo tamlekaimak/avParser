@@ -2,7 +2,7 @@
 Тут функция по парсингу
 """
 
-from db import ParseOrder, getChatid, isMoreOrders, UpdateOrderStatus
+from db import ParseOrder, getChatid, isMoreOrders, UpdateOrderStatus, getGmail
 import parserpro
 from messagesControl import send, senddoc
 
@@ -23,13 +23,35 @@ def GoParse():
         while True:
             parse_id, city, value, Amount, Rating, Views = ParseOrder()
             chatid = getChatid(parse_id)
-
-            parserpro.main(city, value, str(chatid), int(Amount), int(Rating), int(Views))
-            UpdateOrderStatus(parse_id)
-
-            send(chatid, 'Готово, держи свой csv!')
-            senddoc(chatid, value)
-
+            gmail = getGmail(chatid)
+            if gmail == 'не указан':
+                gmail = None
+            data = {
+                "userInfo": {
+                    "userID": chatid
+                },
+                "parseBody": {
+                    "filters":
+                        {
+                            "addsAmount": int(Amount),
+                            "sellerRating": int(Rating),
+                            "addViews": int(Views)
+                        },
+                    "city": city,
+                    "value": value,
+                    "google": gmail
+                }
+            }
+            if gmail:
+                name, href = parserpro.main(data)
+                UpdateOrderStatus(parse_id)
+                send(chatid, 'Готово, держи свой заказ!\n\nСсылка на Google Documents:\n' + str(href))
+            else:
+                name = parserpro.main(data)
+                UpdateOrderStatus(parse_id)
+                send(chatid, 'Готово, держи свой заказ!')
+            senddoc(chatid, name, '.xlsx')
+            senddoc(chatid, name, '.csv')
             if not isMoreOrders():
                 isParsingNow = False
                 break

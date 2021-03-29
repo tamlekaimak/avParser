@@ -18,7 +18,8 @@ def createTables():
             chatid int PRIMARY KEY,
             username VARCHAR(32) NOT NULL,
             ParseAmount int NOT NULL DEFAULT (0),
-            SubDate DATETIME	
+            gmail VARCHAR(100),
+            SubDate DATETIME
             );
             """)
     cursor.execute(query)

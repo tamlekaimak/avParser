@@ -267,3 +267,23 @@ def minusOneParse(chatid):
     query = "UPDATE Clients SET ParseAmount = ParseAmount - 1 WHERE chatid = " + str(chatid) + ""
     cursor.execute(query)
     connection.commit()
+
+
+def getGmail(chatid):
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = "SELECT gmail FROM Clients WHERE chatid = " + str(chatid)
+    cursor.execute(query)
+    result = cursor.fetchone()[0]
+    if result:
+        return result
+    else:
+        return "не указан"
+
+
+def addGmail(chatid, gmail):
+    connection = connectDB()
+    cursor = connection.cursor()
+    query = "UPDATE Clients SET gmail = '" + str(gmail) + "' WHERE chatid = " + str(chatid) + ""
+    cursor.execute(query)
+    connection.commit()
