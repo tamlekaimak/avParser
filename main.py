@@ -5,7 +5,18 @@ from messagesControl import mainmenu, welcome, edit, send
 from botStarter import bot
 from ParseManager import GoParse
 from payControl import QiwiPay, check_bill, kill_bill
+import json, telebot
 
+
+
+# открываем json файл и считываем оттуда токен бота
+with open('token.json', 'r', encoding='utf-8') as f:
+    text = json.load(f)
+botToken = text['token']
+
+bot = telebot.AsyncTeleBot(botToken)
+
+print("BOT STARTED!")
 
 def isCityTrue(name):
     """

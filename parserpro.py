@@ -133,7 +133,7 @@ def get_page_data(html,g_city,counter):
                             ignore_index=True)
     return Data,counter
 
-def all_pages_parser(pagesNumber,g_city,search,chat_id,filters):
+def all_pages_parser(pagesNumber,g_city,search,chat_id,filters,fileFormat):
     main_url = "https://www.avito.ru/"
     mainurl = main_url + g_city + "?"+"p=1&"
     print('Объявлений:', pagesNumber)
@@ -149,7 +149,13 @@ def all_pages_parser(pagesNumber,g_city,search,chat_id,filters):
     for i in filters.keys():
         if(filters[i]):
             mainDF=mainDF.drop(i,axis=1)
-    mainDF.to_excel('Объявления/'+search+chat_id+'.xlsx',sheet_name='Объявления',index=False,engine='openpyxl')
+    if(fileFormat=='xlsx'):
+        mainDF.to_excel('Объявления/' + search + chat_id + '.xlsx', sheet_name='Объявления', index=False,
+                        engine='openpyxl')
+    elif (fileFormat == 'csv'):
+        mainDF.to_csv('Объявления/'+search+chat_id+'.csv')
+
+
 
 def get_pages_number(html):
     soup = BeautifulSoup(html, 'lxml')
@@ -160,15 +166,16 @@ def get_pages_number(html):
         p = 1
     return p
 
-def main(g_city,search,user_id,isRating,isAdsNumber,isViews):
+def main(g_city,search,user_id,isRating,isAdsNumber,isViews,fileFormat):
     filters={'Рейтинг':isRating,'Кол-во объяв':isAdsNumber,'Просмотры':isViews}
     all_pages_parser(g_city=g_city,search=search,chat_id=user_id,pagesNumber=int(get_pages_number(get_html(
         "https://www.avito.ru/" + g_city + "?" + "q=" + search.replace(' ', '+')
-    ))),filters=filters)
+    ))),filters=filters,fileFormat=fileFormat)
     print('парсер закончил работу')
 
 
 if(__name__=="__main__"):
-    main("kazan","Ford Mustang",'1',0,0,0)
+    main("kazan","Ford Mustang",'1',0,0,0,'xlml')
+
 
 # >>>>>>> 9a6929b207372c3b501b52fe0dca4f5761164901

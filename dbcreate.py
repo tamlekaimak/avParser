@@ -52,4 +52,3 @@ def createTables():
         """)
     cursor.execute(query)
     connection.commit()
-

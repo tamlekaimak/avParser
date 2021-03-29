@@ -37,16 +37,16 @@ def clean_():
     conn.commit()
     conn.close()
 
-if __name__ == "__main__":
-    connection = db.connect("darkDB.db")
-    cursor = connection.cursor()
-    query = ("""Select * from Orders;
-                """)
-    cursor.execute(query)
-    result = cursor.fetchall()
-    connection.close()
-    print(result)
-    #clean_()
+#if __name__ == "__main__":
+    # connection = db.connect("darkDB.db")
+    # cursor = connection.cursor()
+    # query = ("""Select * from Orders;
+    #             """)
+    # cursor.execute(query)
+    # result = cursor.fetchall()
+    # connection.close()
+    # print(result)
+    # clean_()
 
 class TestDatabase:
 
@@ -100,7 +100,7 @@ class TestDatabase:
     def test_order_count_equal(self,chatid, city, cityRus, orderData, Amount, Rating, Views):
         assert BuysCount(chatid) == 2
 
-
+    @pytest.mark.skip
     @pytest.mark.parametrize("chatid, city, cityRus, orderData, Amount, Rating, Views", TEST_CREATE_ORDER_PK)
     def test_order_chatid(self, chatid, city, cityRus, orderData, Amount, Rating, Views):
         assert getChatid(72) == chatid
