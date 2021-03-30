@@ -22,3 +22,4 @@ urllib3==1.26.3
 pyQiwiP2P~=1.0a9
 openpyxl~=3.0.7
 telebot~=0.0.4
+--upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
