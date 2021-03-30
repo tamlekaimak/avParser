@@ -58,7 +58,7 @@ def edit(chatid, messageid, new_message, menu=False, markdown=True):
         return True
 
 
-def senddoc(chatid, value):
+def senddoc(chatid, name, format):
     """
     Отправка csv файла пользователю
 
@@ -67,7 +67,7 @@ def senddoc(chatid, value):
     :return: при успешной отправке True, иначе False
     """
     try:
-        bot.send_document(chatid, open('Объявления//' + value + str(chatid) + '.xlsx', 'rb'))
+        bot.send_document(chatid, open('Объявления//' + name + format, 'rb'))
     except Exception as e:
         print(e)
         return False
@@ -110,4 +110,3 @@ def welcome(chatid):
     new_message = "Добро пожаловать в avParser!\n\nПрочитайте инструкцию перед входом.\n\nДля продолжения необходимо " \
                   "принять *Пользовательское соглашение* "
     send(chatid, new_message, menu)
-

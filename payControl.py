@@ -9,7 +9,7 @@ def check_bill(chatid):
     bill_data = getBillid(chatid)
     status = p2p.check(bill_id=bill_data).status
     print(status)
-    if status == 'WAITING':
+    if status == 'PAYED':
         return True
     else:
         return False

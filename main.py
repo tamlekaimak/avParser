@@ -1,14 +1,14 @@
 
 
 from telebot import types
-from db import insert, IsNewClient, BuysCount, NewOrder, Orders, dbstart, getOrderStatus, getParseAmount, lastBillAmount, updateParseAmount, minusOneParse
+from db import insert, IsNewClient, BuysCount, NewOrder, Orders, dbstart, getOrderStatus, getParseAmount, lastBillAmount, updateParseAmount, minusOneParse, addGmail, getGmail
 from cities import cities
 from messagesControl import mainmenu, welcome, edit, send
 from botStarter import bot
 from ParseManager import GoParse
 from payControl import QiwiPay, check_bill, kill_bill
 import json, telebot
-
+import re
 
 
 # открываем json файл и считываем оттуда токен бота
@@ -44,6 +44,8 @@ def removeSettings(chatid):
 citysend = []
 # массив для проверки отправления города пользователем
 valuesend = []
+# массив для проверки отправления Gmail пользователем
+gmailsend = []
 # словарь в который записывается город перед отправкой в БД (на английском)
 city = {}
 # словарь в который записывается город перед отправкой в БД (на русском)
@@ -94,6 +96,19 @@ def texthandler(message):
         menu.add(types.InlineKeyboardButton(text="Начать парсинг", callback_data="startParsing"))
         menu.add(types.InlineKeyboardButton(text="отмена", callback_data="cancelsend"))
         send(chatid, new_message, menu)
+    elif chatid in gmailsend:
+        pattern = re.compile('(^|\s)[-a-z0-9_.]+@([-a-z0-9]+\.)+[a-z]{2,6}(\s|$)')
+        if "@gmail.com" in message.text and pattern.match(message.text):
+            gmailsend.remove(chatid)
+            addGmail(chatid, message.text)
+            new_message = 'Почта успешно привязана, теперь вы можете получать данные в Google Documents!'
+            send(chatid, new_message)
+            mainmenu(chatid)
+        else:
+            new_message = 'Почта не валидна, попробуйте снова:'
+            menu = types.InlineKeyboardMarkup()
+            menu.add(types.InlineKeyboardButton(text="отмена", callback_data="profile"))
+            send(chatid, new_message, menu=menu)
     else:
         new_message = 'Я тебя не понял!'
         send(chatid, new_message)
@@ -165,10 +180,22 @@ def answer(message):
             print(message.data + ' Error: ', e)
     elif message.data == 'profile':
         try:
+            if chatid in gmailsend:
+                gmailsend.remove(chatid)
             menu = types.InlineKeyboardMarkup()
             new_message = "*👨🏽‍💻Профиль*\n\nВаш id: " + str(chatid) + "\nКол-во заказов: " + str(BuysCount(chatid)) + \
-                          "\nОсталось парсов: " + str(getParseAmount(chatid))
+                          "\nОсталось парсов: " + str(getParseAmount(chatid)) + "\nGmail: " + getGmail(chatid)
+            menu.add(types.InlineKeyboardButton(text="Добавить/Изменить Gmail", callback_data="addGmail"))
             menu.add(types.InlineKeyboardButton(text="назад", callback_data="retmainmenu"))
+            edit(chatid, message.message.message_id, new_message, menu)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
+    elif message.data == 'addGmail':
+        try:
+            menu = types.InlineKeyboardMarkup()
+            new_message = 'Отправь мне свою почту Gmail, в виде:\nexample@gmail.com'
+            gmailsend.append(chatid)
+            menu.add(types.InlineKeyboardButton(text="отмена", callback_data="profile"))
             edit(chatid, message.message.message_id, new_message, menu)
         except Exception as e:
             print(message.data + ' Error: ', e)
@@ -255,6 +282,29 @@ def answer(message):
                 ViewsOn.remove(chatid)
                 menu.add(types.InlineKeyboardButton(text="Кол-во просмотров объявления: Выкл", callback_data="ViewsOn"))
             menu.add(types.InlineKeyboardButton(text="Начать парсинг", callback_data="startParsing"))
+            menu.add(types.InlineKeyboardButton(text="отмена", callback_data="cancelsend"))
+            edit(chatid, message.message.message_id, new_message, menu)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
+    elif message.data == 'selectFormat':
+        try:
+            menu = types.InlineKeyboardMarkup()
+            new_message = 'Выберите формат вывода данных:'
+            if chatid in AmountOn:
+                menu.add(types.InlineKeyboardButton(text="Кол-во объявлений продавца: Вкл", callback_data="AmountOff"))
+            else:
+                menu.add(types.InlineKeyboardButton(text="Кол-во объявлений продавца: Выкл", callback_data="AmountOn"))
+            if chatid in RatingOn:
+                menu.add(types.InlineKeyboardButton(text="Рейтинг: Вкл", callback_data="RatingOff"))
+            else:
+                menu.add(types.InlineKeyboardButton(text="Рейтинг: Выкл", callback_data="RatingOn"))
+            if message.data == 'ViewsOn':
+                ViewsOn.append(chatid)
+                menu.add(types.InlineKeyboardButton(text="Кол-во просмотров объявления: Вкл", callback_data="ViewsOff"))
+            else:
+                ViewsOn.remove(chatid)
+                menu.add(types.InlineKeyboardButton(text="Кол-во просмотров объявления: Выкл", callback_data="ViewsOn"))
+            menu.add(types.InlineKeyboardButton(text="Начать парсинг", callback_data="selectFormat"))
             menu.add(types.InlineKeyboardButton(text="отмена", callback_data="cancelsend"))
             edit(chatid, message.message.message_id, new_message, menu)
         except Exception as e:
