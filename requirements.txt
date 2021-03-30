@@ -21,3 +21,4 @@ Unidecode==1.2.0
 urllib3==1.26.3
 pyQiwiP2P~=1.0a9
 openpyxl~=3.0.7
+telebot~=0.0.4
