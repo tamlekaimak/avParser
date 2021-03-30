@@ -14,13 +14,9 @@ import googleSheets
 
 
 def get_session(proxy):
-    print('We in get session and proxy:',proxy)
     session = requests.Session()
-    if (bool(proxy)):
+    if(proxy!=0):
         session.proxies.update(proxy)
-    else:
-        print(')))))')
-
     session.headers = {
         'Host':'www.avito.ru',
         'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:69.0)   Gecko/20100101 Firefox/69.0',
@@ -55,17 +51,11 @@ def get_page_data(html,g_city,counter,proxies_list):
     soup = BeautifulSoup(html, 'lxml')
     ads = soup.find_all('div', class_='iva-item-body-NPl6W')
     Data=pd.DataFrame(columns=['Заголовок','Цена','Описание','Имя_Продавца','Рейтинг','Дата','Телефон','Кол-во объяв','url',"Просмотры"])
-    session=get_session(0)
-    error=False
+    session=get_session({'http':'socks5://aibulatryic4445:bc6b63@176.119.142.202:10098',
+                     'https':'socks5://aibulatryic4445:bc6b63@176.119.142.202:10098'
+})
     for ad in ads:
-
-        if error:
-            session=get_session(proxies_list.pop([0]))
-            error=False
-        if counter%30==0:
-            print('Подождите 10 секунд')
-            time.sleep(3)
-            counter=counter+1;
+        counter=counter+1;
         try:
             url = 'https://www.avito.ru/' + ad.find('a').get('href').strip()
         except:
@@ -80,46 +70,35 @@ def get_page_data(html,g_city,counter,proxies_list):
         except:
             price = 'none'
         if(url!='none'):
-            time.sleep(0.5);
             print(url[22:28])
-            counter = counter + 1;
             print('counter:',counter)
             id=url.split('_')[-1].split('?')[0]
             print(id)
-            while len(proxies_list)>0:
-
+            jsonfile = json.loads(session.get(
+                'https://m.avito.ru/api/14/items/' + id + '?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view').text)
+            phone = json.loads(session.get(
+                'https://m.avito.ru/api/1/items/' + id + '/phone?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view').text)
+            try:
+                print(jsonfile['code'])
+                session = get_session({'http': 'socks5://aibulatryic4445:bc6b63@176.119.142.202:10098',
+                                       'https': 'socks5://aibulatryic4445:bc6b63@176.119.142.202:10098'})
+                print('была создана сессия в jsonfile')
+            except:
+                print('ok json')
                 try:
-                    jsonfile = json.loads(session.get(
-                                                'https://m.avito.ru/api/14/items/' + id + '?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view').text)
-                    phone=json.loads(session.get('https://m.avito.ru/api/1/items/'+id+'/phone?key=af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir&action=view').text)
-                    print(phone)
-                    try:
-                        if (jsonfile['code'] == 403):
-                            session = get_session(proxies_list.pop())
-                            continue
-                    except:
-                        print('HOOO')
-                        try:
-                            if (phone['code'] == 403):
-                                print('HIII')
-                                session = get_session(proxies_list.pop())
-                                continue
-                        except:
-                            print('Okay'); break
+                    print(phone['code'])
+                    session=get_session()
                 except:
-                    session=get_session(proxies_list.pop())
-                    continue
-
-
-            if(len(proxies_list)==0):
-                print('Прокси закончились!!!')
-                break
-            if(phone['result']['action']['uri'].find('number')!=-1):
-                phone=phone['result']['action']['uri'][-11:]
-            elif(phone['result']['action']['uri'].find('authenticate')!=-1):
-                phone='Необходима авторизация'
-            else:
-                phone='Нет информации'
+                    print('all okay')
+            try:
+                if (phone['result']['action']['uri'].find('number') != -1):
+                    phone = phone['result']['action']['uri'][-11:]
+                elif (phone['result']['action']['uri'].find('authenticate') != -1):
+                    phone = 'Необходима авторизация'
+                else:
+                    phone = 'Нет информации'
+            except:
+                phone = 'Нет информации'
             try:
                 pages = jsonfile['seller']['summary'].split(' ')[0]
             except:
@@ -179,7 +158,7 @@ def get_proxies_list():
 def all_pages_parser(pagesNumber,g_city,search,chat_id,filters,gmail):
     main_url = "https://www.avito.ru/"
     mainurl = main_url + g_city + "?"+"p=1&"
-    print('Объявлений:', pagesNumber)
+    print('Страниц:', pagesNumber)
     dopurl = "q=" + search.replace(' ', '+')
     counter=1;
     mainDF=pd.DataFrame(columns=['Заголовок','Цена','Описание','Имя_Продавца','Рейтинг','Дата','Телефон','Кол-во объяв','url',"Просмотры"])
@@ -192,12 +171,12 @@ def all_pages_parser(pagesNumber,g_city,search,chat_id,filters,gmail):
     for i in filters.keys():
         if(filters[i]):
             mainDF=mainDF.drop(i,axis=1)
-    mainDF.to_excel('Объявления/' + search + chat_id + '.xlsx', sheet_name='Объявления', index=False,
+    mainDF.to_excel('Объявления/' + search + str(chat_id) + '.xlsx', sheet_name='Объявления', index=False,
                     engine='openpyxl')
-    mainDF.to_csv('Объявления/'+search+chat_id+'.csv')
+    mainDF.to_csv('Объявления/'+search+str(chat_id)+'.csv')
     if(gmail!=''):
-        return googleSheets(search+chat_id,gmail=gmail,df=mainDF),search+chat_id
-    return search+chat_id
+        return googleSheets.main(search+str(chat_id),gmail=gmail,df=mainDF),search+str(chat_id)
+    return search+str(chat_id)
 
 
 
@@ -224,12 +203,12 @@ def main(fromUserData):
 
 if(__name__=="__main__"):
     main({'userInfo':{'userID':1},
-          'parseBody':{'filters':{'addsAmount':1,
-                                  'sellerRating':1,
-                                  'addViews':1},
+          'parseBody':{'filters':{'Кол-во объяв':1,
+                                  'Рейтинг':1,
+                                  'Просмотры':1},
                        'city':'kazan',
-                       'value':'Chevrolet',
-                       'google':'aibulat.ryic@google.com'},
+                       'value':'acer predator gelios',
+                       'google':'aibulat.ryic@gmail.com'},
           })
 
 # >>>>>>> 9a6929b207372c3b501b52fe0dca4f5761164901

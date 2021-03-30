@@ -6,7 +6,7 @@ def main(listname,gmail,df):
 
     from oauth2client.service_account import ServiceAccountCredentials
 
-    CREDENTIALS_FILE = 'token.json'  # Имя файла с закрытым ключом, вы должны подставить свое
+    CREDENTIALS_FILE = 'credentials.json'  # Имя файла с закрытым ключом, вы должны подставить свое
 
     # Читаем ключи из файла
     credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE, ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive'])
