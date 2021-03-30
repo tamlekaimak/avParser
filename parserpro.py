@@ -169,13 +169,13 @@ def all_pages_parser(pagesNumber,g_city,search,chat_id,filters,gmail):
         page_df,counter=get_page_data(get_html(url_gen),g_city,counter=counter,proxies_list=get_proxies_list())
         mainDF=mainDF.append(page_df)
     for i in filters.keys():
-        if(filters[i]):
+        if(filters[i]==0):
             mainDF=mainDF.drop(i,axis=1)
     mainDF.to_excel('Объявления/' + search + str(chat_id) + '.xlsx', sheet_name='Объявления', index=False,
                     engine='openpyxl')
     mainDF.to_csv('Объявления/'+search+str(chat_id)+'.csv')
     if(gmail!=''):
-        return googleSheets.main(search+str(chat_id),gmail=gmail,df=mainDF),search+str(chat_id)
+        return search+str(chat_id),googleSheets.main(search+str(chat_id),gmail=gmail,df=mainDF)
     return search+str(chat_id)
 
 

@@ -33,9 +33,9 @@ def GoParse():
                 "parseBody": {
                     "filters":
                         {
-                            "addsAmount": int(Amount),
-                            "sellerRating": int(Rating),
-                            "addViews": int(Views)
+                            "Кол-во объяв": int(Amount),
+                            "Рейтинг": int(Rating),
+                            "Просмотры": int(Views)
                         },
                     "city": city,
                     "value": value,
