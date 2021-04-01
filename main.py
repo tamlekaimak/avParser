@@ -1,5 +1,3 @@
-
-
 from telebot import types
 from db import insert, IsNewClient, BuysCount, NewOrder, Orders, dbstart, getOrderStatus, getParseAmount, lastBillAmount, updateParseAmount, minusOneParse, addGmail, getGmail
 from cities import cities
@@ -23,7 +21,6 @@ print("BOT STARTED!")
 def isCityTrue(name):
     """
     Проверка города на валидность и отправка его английской версии
-
     :param name: название города на русском
     :return: если город верный, то отправка английской версии, иначе False
     """
