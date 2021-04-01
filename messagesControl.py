@@ -87,8 +87,8 @@ def mainmenu(chatid, message_id=False):
     menu.add(types.InlineKeyboardButton(text='🔎Спарсить', callback_data='parse'))
     menu.add(types.InlineKeyboardButton(text='👨🏽‍💻Профиль', callback_data='profile'),
              types.InlineKeyboardButton(text='🗒История', callback_data='history'))
-    # menu.add(types.InlineKeyboardButton(text='❓Инструкция', callback_data='instruction'),
-    # types.InlineKeyboardButton(text='👨🏼‍🔧Помощь', callback_data='help'))
+    menu.add(types.InlineKeyboardButton(text='❓Инструкция', callback_data='instruction'),
+    types.InlineKeyboardButton(text='👨🏼‍🔧Помощь', callback_data='help'))
     new_message = "_Главное меню_"
     if not message_id:
         send(chatid, new_message, menu)

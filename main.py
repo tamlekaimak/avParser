@@ -318,6 +318,23 @@ def answer(message):
             GoParse()
         except Exception as e:
             print(message.data + ' Error: ', e)
+    elif message.data == 'instruction':
+        try:
+            menu = types.InlineKeyboardMarkup()
+            new_message = '*❓Инструкция*\n\nВся нужная информация находится в статье ниже😉'
+            menu.add(types.InlineKeyboardButton(text="Инструкция", url="https://telegra.ph/"))
+            menu.add(types.InlineKeyboardButton(text="назад", callback_data="retmainmenu"))
+            edit(chatid, message.message.message_id, new_message, menu)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
+    elif message.data == 'help':
+        try:
+            menu = types.InlineKeyboardMarkup()
+            new_message = '*👨🏼‍🔧Помощь*\n\nЕсли остались вопросы или нужна помощь, то можете написать поддержке @Little\_Ruslan'
+            menu.add(types.InlineKeyboardButton(text="назад", callback_data="retmainmenu"))
+            edit(chatid, message.message.message_id, new_message, menu)
+        except Exception as e:
+            print(message.data + ' Error: ', e)
     elif message.data == 'cancelsend':
         try:
             if chatid in citysend:
