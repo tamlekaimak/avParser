@@ -228,7 +228,7 @@ def UpdateBillStatus(bill_data):
 def getBillid(chatid):
     connection = connectDB()
     cursor = connection.cursor()
-    query = "SELECT bill_data FROM PayBills WHERE isPayed = 0 and chatid = " + str(chatid)
+    query = "SELECT bill_data FROM PayBills WHERE isPayed = 0 and chatid = " + str(chatid) + " ORDER BY bill_id DESC"
     cursor.execute(query)
     result = cursor.fetchone()[0]
     return result
