@@ -174,8 +174,8 @@ def all_pages_parser(pagesNumber,g_city,search,chat_id,filters,gmail):
     mainDF.to_excel('Объявления/' + search + str(chat_id) + '.xlsx', sheet_name='Объявления', index=False,
                     engine='openpyxl')
     mainDF.to_csv('Объявления/'+search+str(chat_id)+'.csv')
-    if(gmail!=''):
-        return search+str(chat_id),googleSheets.main(search+str(chat_id),gmail=gmail,df=mainDF)
+    if(gmail!=None):
+        return search+str(chat_id),str(googleSheets.main(search+str(chat_id),gmail=gmail,df=mainDF))
     return search+str(chat_id)
 
 
@@ -190,6 +190,7 @@ def get_pages_number(html):
     return p
 
 def main(fromUserData):
+    print(fromUserData)
     return all_pages_parser(g_city=fromUserData['parseBody']['city'],
                             search=fromUserData['parseBody']['value'],
                             chat_id=fromUserData['userInfo']['userID'],
